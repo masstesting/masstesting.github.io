@@ -844,6 +844,12 @@ function pulseControlHint(direction) {
   if (!direction) {
     return;
   }
+  if (!pulseControlHint.arrowVariants) {
+    pulseControlHint.arrowVariants = ["control-spin", "control-pulse"];
+  }
+  if (typeof pulseControlHint.arrowVariantIndex !== "number") {
+    pulseControlHint.arrowVariantIndex = -1;
+  }
   const map = {
     up: ["up"],
     down: ["down"],
@@ -857,13 +863,19 @@ function pulseControlHint(direction) {
   targets.forEach((dir) => {
     const arrow = document.querySelector(`.controls-hint__arrow[data-dir="${dir}"]`);
     const key = document.querySelector(`.controls-hint__key[data-dir="${dir}"]`);
-    [arrow, key].forEach((el) => {
-      if (!el) {
-        return;
-      }
-      el.classList.remove("control-pulse");
-      void el.offsetWidth; // force reflow
-      el.classList.add("control-pulse");
-    });
+    pulseControlHint.arrowVariantIndex = (pulseControlHint.arrowVariantIndex + 1) % pulseControlHint.arrowVariants.length;
+    const arrowClass = pulseControlHint.arrowVariants[pulseControlHint.arrowVariantIndex];
+    const keyClass = "control-pulse";
+
+    if (arrow) {
+      arrow.classList.remove("control-pulse", "control-spin");
+      void arrow.offsetWidth;
+      arrow.classList.add(arrowClass);
+    }
+    if (key) {
+      key.classList.remove("control-pulse", "control-spin");
+      void key.offsetWidth;
+      key.classList.add(keyClass);
+    }
   });
 }
