@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Текстовая змейка</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <div id="scoreValue" class="score-display">0</div>
+  <div class="controls-hint">
+    <div class="controls-hint__item"><span class="controls-hint__arrow" data-dir="left">←</span><span class="controls-hint__key" data-dir="left">a</span></div>
+    <div class="controls-hint__item"><span class="controls-hint__arrow" data-dir="up">↑</span><span class="controls-hint__key" data-dir="up">w</span></div>
+    <div class="controls-hint__item"><span class="controls-hint__arrow" data-dir="down">↓</span><span class="controls-hint__key" data-dir="down">s</span></div>
+    <div class="controls-hint__item"><span class="controls-hint__arrow" data-dir="right">→</span><span class="controls-hint__key" data-dir="right">d</span></div>
+  </div>
+  <aside class="info-panel">
+    <div class="info-panel__section">
+      <h2 class="info-panel__title">Кейсы</h2>
+      <div class="info-panel__links">
+        <a class="info-panel__link" href="#" target="_blank" rel="noopener">Самокат</a>
+        <a class="info-panel__link" href="#" target="_blank" rel="noopener">Ozon</a>
+      </div>
+    </div>
+    <div class="info-panel__section info-panel__section--contacts">
+      <h2 class="info-panel__title">Кристина Чаплинская</h2>
+      <div class="info-panel__links">
+        <a class="info-panel__link" href="#" target="_blank" rel="noopener">Скачать резюме</a>
+        <a class="info-panel__link" href="#" target="_blank" rel="noopener">tg</a>
+        <a class="info-panel__link" href="#" target="_blank" rel="noopener">lnkd</a>
+        <a class="info-panel__link" href="mailto:example@example.com">email</a>
+      </div>
+    </div>
+  </aside>
+  <script src="script.js"></script>
+</body>
+</html>
