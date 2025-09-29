@@ -25,6 +25,7 @@ class TextSnakeGame {
     this.gridSize = this.settings.gridSize;
     this.fullLetters = [...this.settings.phrase];
     this.visibleLetters = this.fullLetters.length;
+    this.currentStarSize = this.settings.starSizePx;
 
     this.starShapeDefs = [
       "M24 0L24.0837 1.39581C24.8106 13.5197 34.4803 23.1894 46.6042 23.9163L48 24L46.6042 24.0837C34.4803 24.8106 24.8106 34.4803 24.0837 46.6042L24 48L23.9163 46.6042C23.1894 34.4803 13.5197 24.8106 1.39581 24.0837L0 24L1.39581 23.9163C13.5197 23.1894 23.1894 13.5197 23.9163 1.39581L24 0Z",
@@ -108,6 +109,8 @@ class TextSnakeGame {
     const minColsForPhrase = Math.max(this.visibleLetters + 4, 8);
     this.cols = Math.max(minColsForPhrase, baseColsEstimate);
     this.gridSize = playableWidth / this.cols;
+
+    this.currentStarSize = Math.max(14, Math.min(this.settings.starSizePx, this.gridSize * 0.9));
 
     this.rows = Math.max(6, Math.floor(playableHeight / this.gridSize));
 
@@ -440,7 +443,8 @@ class TextSnakeGame {
 
     const { col, row, points, color } = star;
     const pos = this.gridToPixel(col, row);
-    const scale = this.settings.starSizePx / 48;
+    const targetSize = this.currentStarSize ?? this.settings.starSizePx;
+    const scale = targetSize / 48;
 
     const ctx = this.ctx;
     ctx.save();
@@ -542,7 +546,32 @@ class TextSnakeGame {
   }
 
   clonePointSet(points) {
-    return points ? points.map(point => ({ x: point.x, y: point.y })) : [];
+    if (!points || !points.length) {
+      return [];
+    }
+    return points.map(point => ({ x: point.x, y: point.y }));
+  }
+
+  reducePointSet(points, step = 2) {
+    if (!points || !points.length) {
+      return [];
+    }
+    const stride = Math.max(1, Math.floor(step));
+    if (stride <= 1) {
+      return this.clonePointSet(points);
+    }
+    const reduced = [];
+    for (let i = 0; i < points.length; i += stride) {
+      const point = points[i];
+      reduced.push({ x: point.x, y: point.y });
+    }
+    if (points.length % stride !== 1) {
+      const last = points[points.length - 1];
+      if (last) {
+        reduced.push({ x: last.x, y: last.y });
+      }
+    }
+    return reduced;
   }
 
   randomStarColor() {
@@ -617,12 +646,51 @@ class TextSnakeGame {
     }
 
     const { x, y } = this.gridToPixel(star.col, star.row);
+    const baseShapePoints = this.reducePointSet(star.points || [], 2);
+    const baseColor = star.color || this.settings.letterColor || "#FFFFFF";
+
+    const fragmentCount = Math.max(5, 6 + Math.floor(Math.random() * 4));
+    const fragments = Array.from({ length: fragmentCount }, () => {
+      const angle = Math.random() * Math.PI * 2;
+      return {
+        points: this.clonePointSet(baseShapePoints),
+        angle,
+        startRadius: 6 + Math.random() * 10,
+        endRadius: 38 + Math.random() * 22,
+        startScale: 0.26 + Math.random() * 0.07,
+        endScale: 0.12 + Math.random() * 0.05,
+        spin: (Math.random() - 0.5) * 1.6,
+        rotation: Math.random() * Math.PI * 2,
+        baseAlpha: 0.68 + Math.random() * 0.22,
+        fill: baseColor,
+        stroke: this.colorWithAlpha(baseColor, 1)
+      };
+    });
+
+    const rings = [
+      { maxRadius: 32 + Math.random() * 14, width: 1.9 + Math.random() * 0.7, delay: 0 },
+      { maxRadius: 52 + Math.random() * 16, width: 1.1 + Math.random() * 0.6, delay: 0.2 }
+    ];
+
+    const sparkles = Array.from({ length: 3 + Math.floor(Math.random() * 3) }, () => ({
+      angle: Math.random() * Math.PI * 2,
+      radius: 14 + Math.random() * 14,
+      size: 7 + Math.random() * 4,
+      rotation: Math.random() * Math.PI * 2,
+      color: this.colorWithAlpha(baseColor, 0.75 + Math.random() * 0.18)
+    }));
+
     this.starPops.push({
       x,
       y,
-      color: star.color,
       startTime: performance.now(),
-      duration: 260
+      duration: 440,
+      color: star.color,
+      baseColor,
+      fragments,
+      rings,
+      sparkles,
+      shimmerOffset: Math.random() * Math.PI * 2
     });
   }
 
@@ -636,19 +704,127 @@ class TextSnakeGame {
         continue;
       }
 
-      const eased = this.smoothProgress(progress);
-      const radius = 8 + 18 * eased;
-      const alpha = 1 - progress;
+      const fade = 1 - progress;
+      const radial = this.easeOutCubic(Math.min(1, progress));
 
       ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = pop.color;
-      ctx.lineWidth = 3;
+      ctx.translate(pop.x, pop.y);
+      const baseColor = pop.baseColor || pop.color || "#FFFFFF";
+      ctx.globalCompositeOperation = "lighter";
+
+      if (pop.rings && pop.rings.length) {
+        pop.rings.forEach((ring) => {
+          const denom = Math.max(0.001, 1 - (ring.delay ?? 0));
+          const ringProgress = Math.min(1, Math.max(0, (progress - (ring.delay ?? 0)) / denom));
+          if (ringProgress <= 0) {
+            return;
+          }
+          const ringEase = this.easeOutCubic(ringProgress);
+          const radius = ring.maxRadius * ringEase;
+          const alpha = Math.max(0, 0.48 * (1 - ringProgress));
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.lineWidth = Math.max(0.7, (ring.width ?? 1.4) * (1 - ringProgress * 0.65));
+          ctx.strokeStyle = this.colorWithAlpha(baseColor, 0.85);
+          ctx.beginPath();
+          ctx.arc(0, 0, radius, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        });
+      }
+
+      if (pop.fragments && pop.fragments.length) {
+        pop.fragments.forEach((fragment) => {
+          const travel = this.lerp(fragment.startRadius, fragment.endRadius, radial);
+          const angle = fragment.angle;
+          const px = Math.cos(angle) * travel;
+          const py = Math.sin(angle) * travel;
+          const scale = this.lerp(fragment.startScale, fragment.endScale, radial) * (1 + fade * 0.35);
+          const rotation = fragment.rotation + fragment.spin * progress;
+
+          const points = fragment.points;
+          if (!points || !points.length) {
+            return;
+          }
+
+          ctx.save();
+          ctx.globalCompositeOperation = "source-over";
+          ctx.translate(px, py);
+          ctx.rotate(rotation);
+          ctx.scale(scale, scale);
+          ctx.translate(-24, -24);
+          ctx.globalAlpha = Math.max(0, fragment.baseAlpha * (fade * 0.95 + 0.05));
+          ctx.fillStyle = fragment.fill;
+          ctx.beginPath();
+          ctx.moveTo(points[0].x, points[0].y);
+          for (let i = 1; i < points.length; i += 1) {
+            const pt = points[i];
+            ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.closePath();
+          ctx.fill();
+
+          if (fragment.stroke) {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, fragment.baseAlpha * 0.75 * fade);
+            ctx.strokeStyle = fragment.stroke;
+            ctx.lineWidth = 1.4;
+            ctx.stroke();
+            ctx.restore();
+          }
+
+          ctx.restore();
+        });
+      }
+
+      if (pop.sparkles && pop.sparkles.length) {
+        pop.sparkles.forEach((sparkle, idx) => {
+          const spin = sparkle.rotation + progress * Math.PI * (2.4 + idx * 0.12);
+          const radius = sparkle.radius * (0.45 + radial * 0.65);
+          const px = Math.cos(spin) * radius;
+          const py = Math.sin(spin) * radius;
+          const size = Math.max(3.2, sparkle.size * (0.55 + fade * 0.45));
+
+          ctx.save();
+          ctx.translate(px, py);
+          ctx.rotate(spin * 0.6);
+          ctx.globalAlpha = Math.max(0, 0.52 * fade);
+          ctx.fillStyle = sparkle.color || this.colorWithAlpha(baseColor, 0.82);
+          ctx.beginPath();
+          ctx.moveTo(0, -size * 0.5);
+          ctx.lineTo(size * 0.35, 0);
+          ctx.lineTo(0, size * 0.5);
+          ctx.lineTo(-size * 0.35, 0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+
+      const pulse = Math.sin(progress * Math.PI * 2 + (pop.shimmerOffset ?? 0)) * 0.08;
+      const coreScale = 0.65 + fade * 0.55 + pulse;
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 0.58 * fade);
+      ctx.fillStyle = this.colorWithAlpha(baseColor, 0.96);
       ctx.beginPath();
-      ctx.arc(pop.x, pop.y, radius, 0, Math.PI * 2);
+      ctx.arc(0, 0, 12 * coreScale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 0.34 * fade);
+      ctx.strokeStyle = this.colorWithAlpha(baseColor, 0.9);
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-8 * coreScale, 0);
+      ctx.lineTo(8 * coreScale, 0);
+      ctx.moveTo(0, -8 * coreScale);
+      ctx.lineTo(0, 8 * coreScale);
       ctx.stroke();
       ctx.restore();
 
+      ctx.restore();
       remaining.push(pop);
     }
     this.starPops = remaining;
@@ -688,6 +864,71 @@ class TextSnakeGame {
 
   smoothProgress(p) {
     return p * p * (3 - 2 * p);
+  }
+
+  easeOutCubic(t) {
+    if (t <= 0) {
+      return 0;
+    }
+    if (t >= 1) {
+      return 1;
+    }
+    const inv = 1 - t;
+    return 1 - inv * inv * inv;
+  }
+
+  lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  colorWithAlpha(color, alpha = 1) {
+    if (!color) {
+      return `rgba(255,255,255,${alpha})`;
+    }
+    const trimmed = color.trim();
+    if (trimmed.startsWith("rgba")) {
+      const open = trimmed.indexOf("(");
+      const close = trimmed.indexOf(")");
+      if (open !== -1 && close !== -1) {
+        const parts = trimmed
+          .slice(open + 1, close)
+          .split(",")
+          .slice(0, 3)
+          .map(part => part.trim());
+        const [r, g, b] = parts;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+    }
+    if (trimmed.startsWith("rgb")) {
+      const open = trimmed.indexOf("(");
+      const close = trimmed.indexOf(")");
+      if (open !== -1 && close !== -1) {
+        const parts = trimmed
+          .slice(open + 1, close)
+          .split(",")
+          .map(part => part.trim());
+        const [r, g, b] = parts;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+    }
+    if (trimmed.startsWith("#")) {
+      let hex = trimmed.slice(1);
+      if (hex.length === 3) {
+        hex = hex
+          .split("")
+          .map(ch => ch + ch)
+          .join("");
+      }
+      if (hex.length === 6) {
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        if (Number.isFinite(r) && Number.isFinite(g) && Number.isFinite(b)) {
+          return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+      }
+    }
+    return `rgba(255,255,255,${alpha})`;
   }
 
   gridToPixel(col, row) {
