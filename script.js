@@ -85,7 +85,7 @@ class TextSnakeGame {
 
     const centerX = this.canvas.width / 2;
     const centerY = this.canvas.height / 2;
-    const verticalOffset = Math.min(this.canvas.height * 0.2, 220);
+    const verticalOffset = Math.min(this.canvas.height * 0.35, 320);
     const startPos = this.gridAlignedPosition(centerX, centerY + verticalOffset);
     const headCol = startPos.col;
     const baseRow = startPos.row;
