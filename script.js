@@ -146,6 +146,10 @@ class TextSnakeGame {
       return;
     }
 
+    if (dir.hint) {
+      pulseControlHint(dir.hint);
+    }
+
     if (!this.userInteracted) {
       this.userInteracted = true;
       this.clearIntroMoves();
@@ -173,25 +177,25 @@ class TextSnakeGame {
       case "W":
       case "ц":
       case "Ц":
-        return { dx: 0, dy: -1 };
+        return { dx: 0, dy: -1, hint: "up" };
       case "ArrowDown":
       case "s":
       case "S":
       case "ы":
       case "Ы":
-        return { dx: 0, dy: 1 };
+        return { dx: 0, dy: 1, hint: "down" };
       case "ArrowLeft":
       case "a":
       case "A":
       case "ф":
       case "Ф":
-        return { dx: -1, dy: 0 };
+        return { dx: -1, dy: 0, hint: "left" };
       case "ArrowRight":
       case "d":
       case "D":
       case "в":
       case "В":
-        return { dx: 1, dy: 0 };
+        return { dx: 1, dy: 0, hint: "right" };
       default:
         return null;
     }
