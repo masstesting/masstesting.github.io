@@ -1007,6 +1007,7 @@ document.addEventListener("DOMContentLoaded", () => {
     game.setUISafeZones(safeZoneProvider());
   });
   setupLinkStarHover();
+  setupProtectedSamokatLink();
 });
 
 function setupLinkStarHover() {
@@ -1017,6 +1018,43 @@ function setupLinkStarHover() {
 
   links.forEach((link) => {
     link.addEventListener("mouseenter", () => spawnHoverStars(link));
+  });
+}
+
+function setupProtectedSamokatLink() {
+  const samokatLink = document.querySelector('.info-panel__link[href="samokat.html"]');
+  if (!samokatLink) {
+    return;
+  }
+
+  const password = "эвдемония";
+
+  const handleAccessAttempt = (event) => {
+    event.preventDefault();
+    const targetUrl = samokatLink.href;
+    const openInNewTab = event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1;
+    const input = window.prompt("Введите пароль или свяжитесь со мной, чтобы его узнать:");
+
+    if (input === null) {
+      return;
+    }
+
+    if (input.trim() === password) {
+      if (openInNewTab) {
+        window.open(targetUrl, "_blank", "noopener");
+      } else {
+        window.location.href = targetUrl;
+      }
+    } else {
+      window.alert("Неверный пароль.");
+    }
+  };
+
+  samokatLink.addEventListener("click", handleAccessAttempt);
+  samokatLink.addEventListener("auxclick", (event) => {
+    if (event.button === 1) {
+      handleAccessAttempt(event);
+    }
   });
 }
 
