@@ -268,3 +268,36 @@ body {
     opacity: 0;
   }
 }
+
+.download-loader {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(22, 10, 12, 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+}
+
+.download-loader--visible {
+  display: flex;
+}
+
+.download-loader__spinner {
+  width: clamp(48px, 12vw, 72px);
+  height: clamp(48px, 12vw, 72px);
+  border-radius: 50%;
+  border: clamp(6px, 1.5vw, 8px) solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  animation: download-spin 0.8s linear infinite;
+}
+
+@keyframes download-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

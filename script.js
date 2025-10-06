@@ -1008,6 +1008,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   setupLinkStarHover();
   setupProtectedSamokatLink();
+  setupResumeDownload();
 });
 
 function setupLinkStarHover() {
@@ -1056,6 +1057,128 @@ function setupProtectedSamokatLink() {
       handleAccessAttempt(event);
     }
   });
+}
+
+function setupResumeDownload() {
+  const resumeLink = document.querySelector('[data-resume-link]');
+  if (!resumeLink) {
+    return;
+  }
+
+  const resumeUrl = resumeLink.getAttribute('href') || resumeLink.dataset.resumeUrl || 'resume.pdf';
+  const loader = createDownloadLoader();
+  const preferredName = deriveDownloadFileName(resumeLink, resumeUrl);
+  let isDownloading = false;
+
+  const startDownload = async () => {
+    if (isDownloading) {
+      return;
+    }
+    isDownloading = true;
+    showDownloadLoader(loader);
+
+    try {
+      const response = await fetch(resumeUrl, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error(`Resume download failed with status ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const tempLink = document.createElement('a');
+      tempLink.href = objectUrl;
+      tempLink.download = preferredName;
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      tempLink.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 4000);
+    } catch (error) {
+      console.error(error);
+      window.alert('Не удалось скачать резюме. Попробуйте еще раз.');
+    } finally {
+      isDownloading = false;
+      hideDownloadLoader(loader);
+    }
+  };
+
+  const handleActivation = (event) => {
+    if (event.type === 'click' && event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    startDownload();
+  };
+
+  resumeLink.addEventListener('click', handleActivation);
+  resumeLink.addEventListener('auxclick', (event) => {
+    if (event.button === 1) {
+      handleActivation(event);
+    }
+  });
+  resumeLink.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      startDownload();
+    }
+  });
+}
+
+function createDownloadLoader() {
+  if (createDownloadLoader.instance) {
+    return createDownloadLoader.instance;
+  }
+  const loader = document.createElement('div');
+  loader.className = 'download-loader';
+  loader.setAttribute('aria-hidden', 'true');
+
+  const spinner = document.createElement('div');
+  spinner.className = 'download-loader__spinner';
+  spinner.setAttribute('role', 'status');
+  spinner.setAttribute('aria-live', 'polite');
+  spinner.setAttribute('aria-label', 'Скачивание резюме');
+
+  loader.appendChild(spinner);
+  document.body.appendChild(loader);
+  createDownloadLoader.instance = loader;
+  return loader;
+}
+
+function showDownloadLoader(loader) {
+  if (!loader) {
+    return;
+  }
+  loader.classList.add('download-loader--visible');
+  loader.setAttribute('aria-hidden', 'false');
+}
+
+function hideDownloadLoader(loader) {
+  if (!loader) {
+    return;
+  }
+  loader.classList.remove('download-loader--visible');
+  loader.setAttribute('aria-hidden', 'true');
+}
+
+function deriveDownloadFileName(link, fallbackUrl) {
+  if (!link) {
+    return 'resume.pdf';
+  }
+  const declared = link.getAttribute('download');
+  if (declared && declared.trim()) {
+    return declared.trim();
+  }
+  try {
+    const url = new URL(fallbackUrl, window.location.href);
+    const pathname = url.pathname || '';
+    const parts = pathname.split('/').filter(Boolean);
+    const candidate = parts[parts.length - 1];
+    if (candidate) {
+      return candidate;
+    }
+  } catch (error) {
+    // ignore URL parsing errors and use default name
+  }
+  return 'resume.pdf';
 }
 
 function collectUISafeZones() {
