@@ -1065,7 +1065,7 @@ function setupResumeDownload() {
     return;
   }
 
-  const resumeUrl = resumeLink.getAttribute('href') || resumeLink.dataset.resumeUrl || 'resume.pdf';
+  const resumeUrl = resumeLink.getAttribute('href') || resumeLink.dataset.resumeUrl || 'resumeChaplinskaya.pdf';
   const loader = createDownloadLoader();
   const preferredName = deriveDownloadFileName(resumeLink, resumeUrl);
   let isDownloading = false;
@@ -1161,7 +1161,7 @@ function hideDownloadLoader(loader) {
 
 function deriveDownloadFileName(link, fallbackUrl) {
   if (!link) {
-    return 'resume.pdf';
+    return 'resumeChaplinskaya.pdf';
   }
   const declared = link.getAttribute('download');
   if (declared && declared.trim()) {
@@ -1178,7 +1178,7 @@ function deriveDownloadFileName(link, fallbackUrl) {
   } catch (error) {
     // ignore URL parsing errors and use default name
   }
-  return 'resume.pdf';
+  return 'resumeChaplinskaya.pdf';
 }
 
 function collectUISafeZones() {
