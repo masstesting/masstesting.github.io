@@ -1023,18 +1023,27 @@ function setupLinkStarHover() {
 }
 
 function setupProtectedSamokatLink() {
-  const samokatLink = document.querySelector('.info-panel__link[href="samokat.html"]');
-  if (!samokatLink) {
+  const protectedLinks = document.querySelectorAll('[data-password-protected]');
+  if (!protectedLinks.length) {
     return;
   }
 
   const password = "эвдемония";
+  const promptMessage = "Введите пароль или свяжитесь со мной, чтобы его узнать:";
+  const errorMessage = "Неверный пароль.";
 
-  const handleAccessAttempt = (event) => {
+  const createHandler = (link) => (event) => {
+    if (event.type === 'click' && event.button !== 0) {
+      return;
+    }
+    if (event.type === 'auxclick' && event.button !== 1) {
+      return;
+    }
+
     event.preventDefault();
-    const targetUrl = samokatLink.href;
-    const openInNewTab = event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1;
-    const input = window.prompt("Введите пароль или свяжитесь со мной, чтобы его узнать:");
+    const targetUrl = link.href;
+    const openInNewTab = event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1 || link.target === '_blank';
+    const input = window.prompt(promptMessage);
 
     if (input === null) {
       return;
@@ -1042,22 +1051,22 @@ function setupProtectedSamokatLink() {
 
     if (input.trim() === password) {
       if (openInNewTab) {
-        window.open(targetUrl, "_blank", "noopener");
+        window.open(targetUrl, link.target || '_blank', 'noopener');
       } else {
         window.location.href = targetUrl;
       }
     } else {
-      window.alert("Неверный пароль.");
+      window.alert(errorMessage);
     }
   };
 
-  samokatLink.addEventListener("click", handleAccessAttempt);
-  samokatLink.addEventListener("auxclick", (event) => {
-    if (event.button === 1) {
-      handleAccessAttempt(event);
-    }
+  protectedLinks.forEach((link) => {
+    const handler = createHandler(link);
+    link.addEventListener('click', handler);
+    link.addEventListener('auxclick', handler);
   });
 }
+
 
 function setupResumeDownload() {
   const resumeLink = document.querySelector('[data-resume-link]');
