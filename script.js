@@ -1055,6 +1055,10 @@ function setupProtectedSamokatLink() {
       } else {
         window.location.href = targetUrl;
       }
+      emitAnalyticsLinkEvent(link.dataset.analyticsKey || 'protected-link', {
+        href: targetUrl,
+        method: openInNewTab ? 'new-tab' : 'same-tab'
+      });
     } else {
       window.alert(errorMessage);
     }
@@ -1085,6 +1089,7 @@ function setupResumeDownload() {
     }
     isDownloading = true;
     showDownloadLoader(loader);
+    let downloadMeta = null;
 
     try {
       const response = await fetch(resumeUrl, { cache: 'no-store' });
@@ -1101,12 +1106,19 @@ function setupResumeDownload() {
       tempLink.click();
       tempLink.remove();
       window.setTimeout(() => URL.revokeObjectURL(objectUrl), 4000);
+      downloadMeta = {
+        size: blob.size,
+        type: blob.type || 'application/pdf'
+      };
     } catch (error) {
       console.error(error);
       window.alert('Не удалось скачать резюме. Попробуйте еще раз.');
     } finally {
       isDownloading = false;
       hideDownloadLoader(loader);
+      if (downloadMeta) {
+        emitAnalyticsLinkEvent(resumeLink.dataset.analyticsKey || 'resume-download', downloadMeta);
+      }
     }
   };
 
@@ -1130,6 +1142,17 @@ function setupResumeDownload() {
       startDownload();
     }
   });
+}
+
+function emitAnalyticsLinkEvent(key, meta = null) {
+  if (!key) {
+    return;
+  }
+  const detail = { key };
+  if (meta && typeof meta === 'object' && Object.keys(meta).length) {
+    detail.meta = meta;
+  }
+  window.dispatchEvent(new CustomEvent('analytics:link-click', { detail }));
 }
 
 function createDownloadLoader() {

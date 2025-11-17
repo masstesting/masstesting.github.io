@@ -39,11 +39,17 @@ body.case-page {
   margin: clamp(32px, 8vh, 72px) auto clamp(32px, 6vh, 56px);
   display: flex;
   flex-direction: column;
-  gap: clamp(20px, 4vh, 40px);
+  gap: 32px;
+}
+
+.case-hero__nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: var(--case-text-secondary);
 }
 
 .case-hero__back {
-  align-self: flex-start;
   font-size: clamp(14px, 2.4vw, 18px);
   color: var(--case-text-secondary);
   text-decoration: none;
@@ -54,6 +60,18 @@ body.case-page {
 
 .case-hero__back:hover {
   opacity: 1;
+}
+
+.case-hero__nav-star {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.case-hero__nav-label {
+  font-family: var(--case-title-font);
+  font-weight: 700;
+  color: var(--case-text-primary);
+  font-size: clamp(16px, 2.6vw, 22px);
 }
 
 .case-hero__content {
@@ -67,8 +85,8 @@ body.case-page {
   margin: 0;
   max-width: clamp(280px, 65vw, 640px);
   font-family: var(--case-title-font);
-  font-size: clamp(26px, 5.4vw, 56px);
-  line-height: 1.08;
+  font-size: 32px;
+  line-height: 40px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--case-text-primary);
@@ -179,7 +197,6 @@ body.case-page {
   .case-hero {
     width: calc(100% - clamp(24px, 10vw, 48px));
     margin-top: clamp(24px, 6vh, 48px);
-    gap: clamp(16px, 4vh, 28px);
   }
 
   .case-hero__content {

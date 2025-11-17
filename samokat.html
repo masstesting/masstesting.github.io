@@ -10,7 +10,11 @@
 <body class="case-page">
   <canvas class="case-grid-canvas" id="caseGridCanvas"></canvas>
   <header class="case-hero">
-    <a class="case-hero__back" href="index.html">← на главную</a>
+    <nav class="case-hero__nav" aria-label="Навигация по кейсу">
+      <a class="case-hero__back" href="index.html">← Назад</a>
+      <span class="case-hero__nav-star" aria-hidden="true">✦</span>
+      <span class="case-hero__nav-label">Самокат</span>
+    </nav>
     <div class="case-hero__content">
       <h1 class="case-hero__title">Как мы научили скидки работать на продвижение СТМ</h1>
       <div class="case-hero__star" id="caseStar"></div>
@@ -37,5 +41,6 @@
     </section>
   </main>
   <script src="samokat.js"></script>
+  <script src="analytics.js"></script>
 </body>
 </html>
