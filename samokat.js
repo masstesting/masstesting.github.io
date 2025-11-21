@@ -241,6 +241,39 @@ class MorphingStar {
   }
 }
 
+function drawStaticStar(canvas, options = {}) {
+  if (!canvas) {
+    return;
+  }
+  const ctx = canvas.getContext("2d");
+  const color = options.color || "#CC0E1F";
+  const targetSize = options.size || canvas.clientWidth || canvas.width || 80;
+  const ratio = window.devicePixelRatio || 1;
+
+  canvas.width = Math.round(targetSize * ratio);
+  canvas.height = Math.round(targetSize * ratio);
+  canvas.style.width = `${targetSize}px`;
+  canvas.style.height = `${targetSize}px`;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(ratio, ratio);
+
+  const center = targetSize / 2;
+  const outer = targetSize * 0.32;
+  const inner = outer * 0.6;
+
+  ctx.clearRect(0, 0, targetSize, targetSize);
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(center, center - outer);
+  ctx.quadraticCurveTo(center + inner, center - inner, center + outer, center);
+  ctx.quadraticCurveTo(center + inner, center + inner, center, center + outer);
+  ctx.quadraticCurveTo(center - inner, center + inner, center - outer, center);
+  ctx.quadraticCurveTo(center - inner, center - inner, center, center - outer);
+  ctx.closePath();
+  ctx.fill();
+}
+
 function createStarRing(container, options = {}) {
   const svgNS = "http://www.w3.org/2000/svg";
   const size = options.size || 120;
@@ -302,7 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const grid = gridCanvas ? new CaseGrid(gridCanvas) : null;
 
   const container = document.getElementById("caseStar");
-  let star = null;
+  let starCanvas = null;
   if (container) {
     createStarRing(container, {
       size: 160,
@@ -316,15 +349,16 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.className = "case-hero__star-canvas";
     canvas.width = canvas.height = 80;
     container.appendChild(canvas);
-    star = new MorphingStar(canvas, { size: 80, color: "#CC0E1F" });
+    starCanvas = canvas;
+    drawStaticStar(canvas, { size: 90, color: "#CC0E1F" });
   }
 
   const handleResize = () => {
     if (grid) {
       grid.resize();
     }
-    if (star) {
-      star.updateCanvasScale();
+    if (starCanvas) {
+      drawStaticStar(starCanvas, { size: 90, color: "#CC0E1F" });
     }
   };
 
