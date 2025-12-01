@@ -1028,7 +1028,7 @@ function setupProtectedSamokatLink() {
     return;
   }
 
-  const password = "эвдемония";
+  const password = "1";
   const promptMessage = "Введите пароль или свяжитесь со мной, чтобы его узнать:";
   const errorMessage = "Неверный пароль.";
 
