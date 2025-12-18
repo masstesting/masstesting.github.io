@@ -364,4 +364,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("resize", handleResize);
 
+  setupCaseSlider();
 });
+
+function setupCaseSlider() {
+  const slider = document.querySelector("[data-case-slider]");
+  if (!slider) {
+    return;
+  }
+
+  const slides = Array.from(slider.querySelectorAll(".case-slider__slide"));
+  const prevBtn = slider.querySelector("[data-case-slider-prev]");
+  const nextBtn = slider.querySelector("[data-case-slider-next]");
+
+  if (!slides.length || !prevBtn || !nextBtn) {
+    return;
+  }
+
+  let current = 0;
+
+  const setActive = (index) => {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle("is-active", i === index);
+    });
+    current = index;
+  };
+
+  const move = (direction) => {
+    const total = slides.length;
+    const next = (current + direction + total) % total;
+    setActive(next);
+  };
+
+  prevBtn.addEventListener("click", () => move(-1));
+  nextBtn.addEventListener("click", () => move(1));
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      move(-1);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      move(1);
+    }
+  });
+
+  setActive(0);
+}
