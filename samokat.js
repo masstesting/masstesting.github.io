@@ -365,6 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("resize", handleResize);
 
   setupCaseSlider();
+  setupAutoPlayVideos();
 });
 
 function setupCaseSlider() {
@@ -409,4 +410,146 @@ function setupCaseSlider() {
   });
 
   setActive(0);
+}
+
+function setupAutoPlayVideos() {
+  const videoWrappers = Array.from(document.querySelectorAll("[data-video]"));
+  if (!videoWrappers.length) {
+    return;
+  }
+
+  const videos = videoWrappers
+    .map((wrap) => {
+      const video = wrap.querySelector("video, .case-video__el");
+      if (!video) {
+        return null;
+      }
+      video.muted = true;
+      video.playsInline = true;
+      if (!video.hasAttribute("preload")) {
+        video.preload = "metadata";
+      }
+      return {
+        wrap,
+        el: video,
+        lastInZone: 0,
+      };
+    })
+    .filter(Boolean);
+
+  if (!videos.length) {
+    return;
+  }
+
+  let active = null;
+  let scheduled = false;
+  let pendingCandidate = null;
+  let debounceTimer = null;
+
+  const startZone = { top: 0.35, bottom: 0.65 };
+  const keepZone = { top: 0.25, bottom: 0.75 };
+  const resetTimeoutMs = 10000;
+  const debounceMs = 180;
+
+  const pauseVideo = (item) => {
+    if (!item) return;
+    item.el.pause();
+    item.el.classList.remove("is-playing");
+  };
+
+  const playVideo = (item) => {
+    if (!item) return;
+    item.el.classList.add("is-playing");
+    const now = performance.now();
+    item.lastInZone = now;
+    item.el.play().catch(() => {
+      // noop if browser blocks autoplay; user can manually start
+    });
+  };
+
+  const chooseCandidate = () => {
+    const vh = window.innerHeight;
+    const center = vh / 2;
+    const candidates = [];
+
+    videos.forEach((item) => {
+      const rect = item.el.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      const norm = mid / vh;
+      const inKeep =
+        norm >= keepZone.top && norm <= keepZone.bottom && rect.height > 0;
+      const inStart =
+        norm >= startZone.top && norm <= startZone.bottom && rect.height > 0;
+
+      item.inKeep = inKeep;
+      item.inStart = inStart;
+      item.distance = Math.abs(mid - center);
+    });
+
+    // If active is out of keep zone, pause it
+    if (active && !active.inKeep) {
+      pauseVideo(active);
+      active = null;
+    }
+
+    const nearest = videos
+      .filter((v) => v.inStart)
+      .sort((a, b) => a.distance - b.distance)[0];
+
+    if (!nearest) {
+      return;
+    }
+
+    if (active && active === nearest) {
+      return;
+    }
+
+    pendingCandidate = nearest;
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    debounceTimer = setTimeout(() => {
+      if (pendingCandidate && pendingCandidate.inStart) {
+        if (active && active !== pendingCandidate) {
+          pauseVideo(active);
+        }
+        active = pendingCandidate;
+        playVideo(active);
+      }
+    }, debounceMs);
+  };
+
+  const tick = () => {
+    scheduled = false;
+    chooseCandidate();
+  };
+
+  const requestTick = () => {
+    if (!scheduled) {
+      scheduled = true;
+      requestAnimationFrame(tick);
+    }
+  };
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (!document.hidden) {
+        requestTick();
+      }
+    },
+    { threshold: [0, 0.25, 0.5, 0.75, 1] }
+  );
+
+  videos.forEach((item) => io.observe(item.el));
+  window.addEventListener("scroll", requestTick, { passive: true });
+  window.addEventListener("resize", requestTick);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      videos.forEach((v) => pauseVideo(v));
+      active = null;
+    }
+  });
+
+  requestTick();
 }

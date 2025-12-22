@@ -329,6 +329,24 @@ body.case-page {
   fill: #f33a59;
 }
 
+.case-video {
+  width: 100%;
+}
+
+.case-video__el {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.08);
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
+.case-video__el.is-playing {
+  opacity: 1;
+}
+
 
 .section-divider {
   width: 100%;

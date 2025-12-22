@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ozon — кейс</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="samokat.css" />
+</head>
+<body class="case-page">
+  <canvas class="case-grid-canvas" id="caseGridCanvas"></canvas>
+  <header class="case-hero">
+    <nav class="case-hero__nav" aria-label="Навигация по кейсу">
+      <a class="case-hero__back" href="index.html">← Назад</a>
+      <span class="case-hero__nav-star" aria-hidden="true">✦</span>
+      <span class="case-hero__nav-label">Ozon</span>
+    </nav>
+    <div class="case-hero__content">
+      <h1 class="case-hero__title">Ozon</h1>
+    </div>
+  </header>
+  <main class="case-main">
+    <section class="case-section case-section--intro">
+      <h2 class="case-section__title">Видео</h2>
+      <p class="case-section__text">
+        Демки сценариев Ozon. Видео без звука, можно воспроизводить по клику.
+      </p>
+      <figure class="case-video">
+        <video class="case-video__el" controls muted playsinline preload="metadata">
+          <source src="video/coupons%20open.mp4" type="video/mp4" />
+        </video>
+        <figcaption class="case-section__text">Coupons Open</figcaption>
+      </figure>
+      <figure class="case-video">
+        <video class="case-video__el" controls muted playsinline preload="metadata">
+          <source src="video/coupons.mp4" type="video/mp4" />
+        </video>
+        <figcaption class="case-section__text">Coupons</figcaption>
+      </figure>
+      <figure class="case-video">
+        <video class="case-video__el" controls muted playsinline preload="metadata">
+          <source src="video/likes.mp4" type="video/mp4" />
+        </video>
+        <figcaption class="case-section__text">Likes</figcaption>
+      </figure>
+      <figure class="case-video">
+        <video class="case-video__el" controls muted playsinline preload="metadata">
+          <source src="video/votes.mp4" type="video/mp4" />
+        </video>
+        <figcaption class="case-section__text">Votes</figcaption>
+      </figure>
+    </section>
+  </main>
+  <script src="samokat.js"></script>
+  <script src="analytics.js"></script>
+</body>
+</html>
