@@ -361,6 +361,34 @@ body.case-page {
   opacity: 1;
 }
 
+.case-media {
+  width: 100%;
+  display: block;
+}
+
+.case-media--wide {
+  width: min(1080px, 100%);
+  margin: 24px auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.case-media--wide .case-video__el,
+.case-media--wide .scroll-video {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 900px) {
+  .case-media--wide {
+    width: min(1080px, calc(100vw - 80px));
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+
 
 .section-divider {
   width: 100%;
