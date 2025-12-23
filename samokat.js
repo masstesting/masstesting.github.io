@@ -368,6 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAutoPlayVideos();
   setupScrollVideos();
   applyNonBreakingSpaces();
+  setupCrossLinkHover();
 });
 
 function setupCaseSlider() {
@@ -725,4 +726,61 @@ function applyNonBreakingSpaces() {
       return `${prep}\u00A0`;
     });
   });
+}
+
+function setupCrossLinkHover() {
+  const links = document.querySelectorAll(".case-crosslink.info-panel__link");
+  if (!links.length) {
+    return;
+  }
+  links.forEach((link) => {
+    link.addEventListener("mouseenter", () => spawnHoverStars(link));
+  });
+}
+
+function spawnHoverStars(link) {
+  const existing = link.querySelectorAll(".hover-star");
+  existing.forEach((star) => star.remove());
+
+  const rect = link.getBoundingClientRect();
+  const starCount = 6 + Math.floor(Math.random() * 3);
+
+  for (let i = 0; i < starCount; i += 1) {
+    const starWrapper = document.createElement("span");
+    starWrapper.className = "hover-star";
+
+    const size = 10 + Math.random() * 18;
+    const opacity = 0.35 + Math.random() * 0.45;
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.max(rect.width, 60) * (0.4 + Math.random() * 0.6);
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance;
+    const duration = 600 + Math.random() * 400;
+
+    starWrapper.style.setProperty("--size", `${size}px`);
+    starWrapper.style.setProperty("--opacity", opacity.toFixed(2));
+    starWrapper.style.setProperty("--dx", `${dx.toFixed(1)}px`);
+    starWrapper.style.setProperty("--dy", `${dy.toFixed(1)}px`);
+    starWrapper.style.setProperty("--duration", `${duration}ms`);
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 48 48");
+    const path = document.createElementNS(svgNS, "path");
+    path.setAttribute("fill", "currentColor");
+    path.setAttribute(
+      "d",
+      "M24 0C24 13.2548 34.7452 24 48 24C34.7452 24 24 34.7452 24 48C24 34.7452 13.2548 24 0 24C13.2548 24 24 13.2548 24 0Z"
+    );
+    svg.appendChild(path);
+    starWrapper.appendChild(svg);
+
+    const removeAfterAnimation = () => {
+      starWrapper.removeEventListener("animationend", removeAfterAnimation);
+      starWrapper.remove();
+    };
+    starWrapper.addEventListener("animationend", removeAfterAnimation);
+
+    link.appendChild(starWrapper);
+  }
 }

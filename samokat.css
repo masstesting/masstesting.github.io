@@ -199,6 +199,15 @@ body.case-page {
   max-width: 100%;
 }
 
+.case-crosslink {
+  display: block;
+  width: fit-content;
+  margin: 160px auto 32px;
+  text-align: center;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
 .case-section:first-of-type .case-section__title {
   margin-top: 0;
 }
