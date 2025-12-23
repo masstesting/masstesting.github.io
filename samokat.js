@@ -366,6 +366,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setupCaseSlider();
   setupAutoPlayVideos();
+  setupScrollVideos();
+  applyNonBreakingSpaces();
 });
 
 function setupCaseSlider() {
@@ -552,4 +554,175 @@ function setupAutoPlayVideos() {
   });
 
   requestTick();
+}
+
+function setupScrollVideos() {
+  const videos = Array.from(document.querySelectorAll(".scroll-video"));
+  if (!videos.length) {
+    return;
+  }
+
+  videos.forEach((video) => {
+    video.muted = true;
+    video.playsInline = true;
+    video.loop = true;
+    video.controls = false;
+    if (!video.hasAttribute("preload")) {
+      video.preload = "metadata";
+    }
+  });
+
+  let active = null;
+  let hasInteracted = false;
+  let scheduled = false;
+  let debounceTimer = null;
+  const debounceMs = 150;
+  const zone = { top: 0.3, bottom: 0.7 };
+
+  const pauseVideo = (video) => {
+    if (!video) return;
+    video.pause();
+    video.classList.remove("is-playing");
+  };
+
+  const playVideo = (video) => {
+    if (!video) return;
+    video.classList.add("is-playing");
+    video.play().catch(() => {});
+  };
+
+  const evaluate = () => {
+    scheduled = false;
+    if (!hasInteracted || document.hidden) {
+      return;
+    }
+    const vh = window.innerHeight || 1;
+    const centerY = vh / 2;
+
+    const candidates = videos
+      .map((el) => {
+        const rect = el.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        const norm = mid / vh;
+        const inZone = norm >= zone.top && norm <= zone.bottom;
+        return {
+          el,
+          inZone,
+          distance: Math.abs(mid - centerY),
+        };
+      })
+      .filter((item) => item.inZone)
+      .sort((a, b) => a.distance - b.distance);
+
+    const next = candidates.length ? candidates[0].el : null;
+
+    if (next && next !== active) {
+      if (active) pauseVideo(active);
+      active = next;
+      playVideo(active);
+    } else if (!next && active) {
+      pauseVideo(active);
+      active = null;
+    }
+  };
+
+  const scheduleEval = () => {
+    if (!hasInteracted) return;
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    debounceTimer = setTimeout(() => {
+      if (!scheduled) {
+        scheduled = true;
+        requestAnimationFrame(evaluate);
+      }
+    }, debounceMs);
+  };
+
+  const io = new IntersectionObserver(
+    () => {
+      scheduleEval();
+    },
+    { threshold: [0, 0.25, 0.5, 0.75, 1] }
+  );
+
+  videos.forEach((v) => io.observe(v));
+
+  const onFirstInteraction = () => {
+    hasInteracted = true;
+    scheduleEval();
+    window.removeEventListener("scroll", onFirstInteraction);
+    window.removeEventListener("touchstart", onFirstInteraction);
+  };
+
+  window.addEventListener("scroll", onFirstInteraction, { passive: true });
+  window.addEventListener("touchstart", onFirstInteraction, { passive: true });
+  window.addEventListener("scroll", scheduleEval, { passive: true });
+  window.addEventListener("resize", scheduleEval);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      videos.forEach(pauseVideo);
+      active = null;
+    }
+  });
+}
+
+function applyNonBreakingSpaces() {
+  const prepositions = [
+    "и",
+    "в",
+    "на",
+    "с",
+    "к",
+    "у",
+    "о",
+    "а",
+    "но",
+    "да",
+    "по",
+    "из",
+    "за",
+    "над",
+    "под",
+    "при",
+    "без",
+    "для",
+    "от",
+    "до",
+    "об",
+    "про"
+  ];
+
+  const pattern = new RegExp(`\\b(${prepositions.join("|")})\\s+`, "gi");
+  const skipTags = new Set(["script", "style", "textarea"]);
+
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode(node) {
+        const parent = node.parentNode;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        const tag = parent.nodeName.toLowerCase();
+        if (skipTags.has(tag)) return NodeFilter.FILTER_REJECT;
+        if (!node.nodeValue || !pattern.test(node.nodeValue)) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        pattern.lastIndex = 0;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
+
+  const toUpdate = [];
+  while (walker.nextNode()) {
+    toUpdate.push(walker.currentNode);
+  }
+
+  toUpdate.forEach((node) => {
+    node.nodeValue = node.nodeValue.replace(pattern, (match, prep) => {
+      return `${prep}\u00A0`;
+    });
+  });
 }

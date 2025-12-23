@@ -347,6 +347,20 @@ body.case-page {
   opacity: 1;
 }
 
+.scroll-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.08);
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-video.is-playing {
+  opacity: 1;
+}
+
 
 .section-divider {
   width: 100%;
