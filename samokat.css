@@ -165,7 +165,7 @@ body.case-page {
   position: relative;
   z-index: 1;
   width: min(680px, calc(100% - 2 * var(--panel-side-offset)));
-  margin: 0 auto clamp(80px, 20vh, 160px);
+  margin: 0 auto 32px;
   display: flex;
   flex-direction: column;
   gap: 0;
