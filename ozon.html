@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Прямые эфиры: опыт зрителей и интерфейсы для продавцов</title>
+  <title>Прямые эфиры: зрительский опыт и интерфейсы для продавцов</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="samokat.css" />
 </head>
@@ -16,38 +16,33 @@
       <span class="case-hero__nav-label">Ozon</span>
     </nav>
     <div class="case-hero__content">
-      <h1 class="case-hero__title">Прямые эфиры: опыт зрителей и интерфейсы для продавцов</h1>
+      <h1 class="case-hero__title">Прямые эфиры: зрительский опыт и интерфейсы для продавцов</h1>
     </div>
   </header>
   <main class="case-main">
     <section class="case-section case-section--intro">
-      <h2 class="case-section__title">Ozon</h2>
+      <h2 class="case-section__title">Прямые эфиры: зрительский опыт и кабинет продавца</h2>
       <p class="case-section__text">
-        В Ozon я работала сразу с двумя сторонами продукта — мобильным приложением для покупателей и веб-кабинетом для продавцов. Оба направления были связаны с прямыми эфирами и развивались параллельно.
+        В Ozon я работала сразу с двумя сторонами продукта — мобильным приложением для зрителей и веб-кабинетом для продавцов. Оба направления развивались параллельно и были завязаны на один сценарий: продавец запускает эфир, зритель смотрит и взаимодействует в моменте.
+      </p>
+      <p class="case-section__text">
+        Ниже — короткие демки ключевых механик. Видео без звука: это скорее «живые гифки», которые показывают поведение интерфейса.
       </p>
     </section>
 
     <section class="case-section">
-      <h2 class="case-section__title">Мобильное приложение</h2>
+      <h2 class="case-section__title">Купоны: выгода здесь и сейчас</h2>
       <p class="case-section__text">
-        В мобильном приложении я занималась развитием прямых эфиров продавцов Ozon Live, которые позже стали частью Ozon Моментов. По сути, это был редизайн и переосмысление старого Ozon Live под новую продуктовую концепцию.
+        Купоны — главный «крючок» в эфире: зрителю понятно, что делать и зачем, а продавец может быстро запустить предложение под конкретный товар прямо во время трансляции.
       </p>
+      <h3 class="case-section__subtitle">Со стороны зрителя</h3>
       <p class="case-section__text">
-        Помимо визуального обновления, добавляла механики, которые усиливали вовлечённость зрителей во время эфира:
+        Купон появляется в контексте эфира, не требует лишних шагов и ощущается как часть шоу, а не как отдельный промо-экран.
       </p>
-      <ul class="case-section__list">
-        <li>скидочные купоны на товары (coupons_open, coupons);</li>
-        <li>голосования (votes);</li>
-        <li>интерактивные лайки с анимацией и тактильной отдачей на iOS (likes).</li>
-      </ul>
+      <h3 class="case-section__subtitle">Со стороны продавца</h3>
       <p class="case-section__text">
-        Важно было сделать так, чтобы эфир ощущался живым и динамичным, а все действия пользователя были простыми и понятными в моменте.
+        В кабинете продавец создаёт купон, выбирает товар и видит, как механика влияет на эфир: можно быстро реагировать на интерес аудитории, не уходя в «сложные настройки».
       </p>
-      <div class="case-media case-media--wide">
-        <video class="scroll-video" muted playsinline preload="metadata" loop>
-          <source src="video/coupons%20open.mp4" type="video/mp4" />
-        </video>
-      </div>
       <div class="case-media case-media--wide">
         <video class="scroll-video" muted playsinline preload="metadata" loop>
           <source src="video/coupons.mp4" type="video/mp4" />
@@ -55,30 +50,7 @@
       </div>
       <div class="case-media case-media--wide">
         <video class="scroll-video" muted playsinline preload="metadata" loop>
-          <source src="video/votes.mp4" type="video/mp4" />
-        </video>
-      </div>
-      <div class="case-media case-media--wide">
-        <video class="scroll-video" muted playsinline preload="metadata" loop>
-          <source src="video/likes.mp4" type="video/mp4" />
-        </video>
-      </div>
-    </section>
-
-    <section class="case-section">
-      <h2 class="case-section__title">Кабинет продавца</h2>
-      <p class="case-section__text">
-        С другой стороны я проектировала веб-кабинет для продавцов — отдельный инструмент, в котором они могли запускать и управлять прямыми эфирами.
-      </p>
-      <p class="case-section__text">
-        Продавец мог заранее создать эфир: добавить описание, обложку, товары, а затем в нужное время запустить его. Во время эфира кабинет превращался в рабочее пространство управления: здесь был чат со зрителями, результаты голосований и базовая аналитика — общее и текущее количество зрителей, добавления в корзину и избранное, покупки, активность в чате.
-      </p>
-      <p class="case-section__text">
-        Например, продавец мог запустить голосование «На какой товар дать купон» (votes_streamer), увидеть результат и прямо во время эфира создать купон на выбранный товар (coupons_streamer).
-      </p>
-      <div class="case-media case-media--wide">
-        <video class="scroll-video" muted playsinline preload="metadata" loop>
-          <source src="video/votes_streamer.mp4" type="video/mp4" />
+          <source src="video/coupons%20open.mp4" type="video/mp4" />
         </video>
       </div>
       <div class="case-media case-media--wide">
@@ -89,15 +61,49 @@
     </section>
 
     <section class="case-section">
+      <h2 class="case-section__title">Лайки: сделать эфир «живым»</h2>
+      <p class="case-section__text">
+        Мне было важно, чтобы эфир ощущался динамичным даже в моменты, когда зритель просто смотрит. Поэтому я доработала лайки как микро-интерактив: анимации, понятная реакция интерфейса и тактильная отдача на iOS.
+      </p>
+      <p class="case-section__text">
+        Это мелочь, но она даёт ощущение присутствия — как будто ты не один в эфире.
+      </p>
+      <div class="case-media case-media--wide">
+        <video class="scroll-video" muted playsinline preload="metadata" loop>
+          <source src="video/likes.mp4" type="video/mp4" />
+        </video>
+      </div>
+    </section>
+
+    <section class="case-section">
+      <h2 class="case-section__title">Голосования: вовлечь и помочь продавцу выбрать</h2>
+      <p class="case-section__text">
+        Голосования решают две задачи сразу: удерживают внимание зрителей и помогают продавцу принимать решение прямо в эфире — что показать, на какой товар дать купон или какую тему продолжить.
+      </p>
+      <h3 class="case-section__subtitle">Со стороны зрителя</h3>
+      <p class="case-section__text">
+        Участие должно быть максимально лёгким: один выбор, сразу понятно, что происходит и зачем.
+      </p>
+      <h3 class="case-section__subtitle">Со стороны продавца</h3>
+      <p class="case-section__text">
+        Продавец запускает голосование и видит результаты в реальном времени — и дальше может действовать по сценарию (например, выпустить купон на выбранный товар).
+      </p>
+      <div class="case-media case-media--wide">
+        <video class="scroll-video" muted playsinline preload="metadata" loop>
+          <source src="video/votes.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <div class="case-media case-media--wide">
+        <video class="scroll-video" muted playsinline preload="metadata" loop>
+          <source src="video/votes_streamer.mp4" type="video/mp4" />
+        </video>
+      </div>
+    </section>
+
+    <section class="case-section">
       <h2 class="case-section__title">Что мне дал этот проект</h2>
       <p class="case-section__text">
-        В Ozon фокус был на визуале, UI и скорости. Дизайн здесь — это быстрые итерации, живая работа с интерфейсом и постоянный диалог с бизнесом.
-      </p>
-      <p class="case-section__text">
-        Я работала сразу с двумя сторонами продукта: мобильным приложением для зрителей и веб-кабинетом для продавцов. Важно было удерживать визуальную целостность и логику между ними. Много внимания уделялось интерактивности, анимациям и тому, как продукт ощущается в моменте.
-      </p>
-      <p class="case-section__text">
-        В Ozon я прокачала навык презентации и защиты решений: показывать дизайн бизнесу, обсуждать, дорабатывать и быстро выпускать изменения. Этот опыт сильно усилил мою UI-экспертизу и уверенность в визуальных решениях.
+        Этот опыт сильно прокачал мою UI-часть и умение защищать решения перед бизнесом. В Ozon темп был быстрый: фичи регулярно показывали руководству, обсуждали, правили и выпускали итерациями. Это научило меня делать интерфейсы аккуратно, быстро и по делу — и объяснять, почему именно так.
       </p>
     </section>
   </main>
