@@ -378,16 +378,29 @@ function setupCaseLoader() {
 
   const loader = document.querySelector(".case-loader");
   if (!loader) return;
+  const starCanvas = loader.querySelector(".loader-star");
+
+  body.classList.add("is-loading");
 
   const prevOverflow = body.style.overflow;
   body.style.overflow = "hidden";
 
-  const minVisibleMs = 400;
+  const MIN_LOADER_TIME = 1500;
   const startedAt = performance.now();
+  let starAnim = null;
+
+  const prefersReduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (starCanvas) {
+    if (prefersReduce) {
+      drawStaticStar(starCanvas, { size: 140, color: "#CC0E1F" });
+    } else {
+      starAnim = new MorphingStar(starCanvas, { size: 140, color: "#CC0E1F", duration: 0.6 });
+    }
+  }
 
   const hideLoader = () => {
     const elapsed = performance.now() - startedAt;
-    const wait = Math.max(0, minVisibleMs - elapsed);
+    const wait = Math.max(0, MIN_LOADER_TIME - elapsed);
     window.setTimeout(() => {
       loader.classList.add("is-hidden");
       loader.addEventListener(
@@ -395,16 +408,46 @@ function setupCaseLoader() {
         () => {
           loader.remove();
           body.style.overflow = prevOverflow;
+          body.classList.remove("is-loading");
+          starAnim = null;
         },
         { once: true }
       );
     }, wait);
   };
 
-  if (document.readyState === "complete") {
+  const onAllLoaded = () => {
     hideLoader();
+    document.removeEventListener("DOMContentLoaded", onAllLoaded);
+    window.removeEventListener("load", onAllLoaded);
+  };
+
+  if (document.readyState === "complete") {
+    onAllLoaded();
   } else {
-    window.addEventListener("load", hideLoader, { once: true });
+    document.addEventListener("DOMContentLoaded", () => {
+      const videos = Array.from(document.querySelectorAll("video"));
+      if (!videos.length) {
+        onAllLoaded();
+        return;
+      }
+      let remaining = videos.length;
+      const settle = () => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          onAllLoaded();
+        }
+      };
+      videos.forEach((v) => {
+        if (v.readyState >= 3) {
+          settle();
+        } else {
+          v.addEventListener("canplaythrough", settle, { once: true });
+          v.addEventListener("error", settle, { once: true });
+        }
+      });
+      window.addEventListener("load", onAllLoaded, { once: true });
+    });
   }
 }
 
