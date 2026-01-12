@@ -8,6 +8,22 @@
   <link rel="stylesheet" href="samokat.css" />
 </head>
 <body class="case-page">
+  <div class="case-loader" aria-hidden="true">
+    <div class="case-loader__content">
+      <div class="case-loader__grid">
+        <div class="case-loader__cell" data-step="0"></div>
+        <div class="case-loader__cell" data-step="1"></div>
+        <div class="case-loader__cell" data-step="2"></div>
+        <div class="case-loader__cell" data-step="3"></div>
+        <div class="case-loader__cell case-loader__cell--center"></div>
+        <div class="case-loader__cell" data-step="4"></div>
+        <div class="case-loader__cell" data-step="7"></div>
+        <div class="case-loader__cell" data-step="6"></div>
+        <div class="case-loader__cell" data-step="5"></div>
+      </div>
+      <p class="case-loader__text">Вспоминаю, а чем я вообще занималась на прошлых работах</p>
+    </div>
+  </div>
   <canvas class="case-grid-canvas" id="caseGridCanvas"></canvas>
   <header class="case-hero">
     <nav class="case-hero__nav" aria-label="Навигация по кейсу">
@@ -39,24 +55,27 @@
       <p class="case-section__text">
         Купон появляется в контексте эфира, не требует лишних шагов и ощущается как часть шоу, а не как отдельный промо-экран.
       </p>
-      <div class="case-media case-media--wide">
-        <video class="scroll-video" muted playsinline preload="metadata" loop>
+      <div class="case-media case-media--wide case-video-wrap">
+        <video class="scroll-video case-video" muted playsinline preload="metadata" loop>
           <source src="video/coupons.mp4" type="video/mp4" />
         </video>
+        <div class="tap-indicator" aria-hidden="true"></div>
       </div>
-      <div class="case-media case-media--wide">
-        <video class="scroll-video" muted playsinline preload="metadata" loop>
+      <div class="case-media case-media--wide case-video-wrap">
+        <video class="scroll-video case-video" muted playsinline preload="metadata" loop>
           <source src="video/coupons%20open.mp4" type="video/mp4" />
         </video>
+        <div class="tap-indicator" aria-hidden="true"></div>
       </div>
       <h3 class="case-section__subtitle">Со стороны продавца</h3>
       <p class="case-section__text">
         В кабинете продавец создаёт купон, выбирает товар и видит, как механика влияет на эфир: можно быстро реагировать на интерес аудитории, не уходя в «сложные настройки».
       </p>
-      <div class="case-media case-media--wide">
-        <video class="scroll-video" muted playsinline preload="metadata" loop>
+      <div class="case-media case-media--wide case-video-wrap">
+        <video class="scroll-video case-video" muted playsinline preload="metadata" loop>
           <source src="video/coupon_streamer.mp4" type="video/mp4" />
         </video>
+        <div class="tap-indicator" aria-hidden="true"></div>
       </div>
     </section>
 
@@ -68,10 +87,11 @@
       <p class="case-section__text">
         Это мелочь, но она даёт ощущение присутствия — как будто ты не один в эфире.
       </p>
-      <div class="case-media case-media--wide">
-        <video class="scroll-video" muted playsinline preload="metadata" loop>
+      <div class="case-media case-media--wide case-video-wrap">
+        <video class="scroll-video case-video" muted playsinline preload="metadata" loop>
           <source src="video/likes.mp4" type="video/mp4" />
         </video>
+        <div class="tap-indicator" aria-hidden="true"></div>
       </div>
     </section>
 
@@ -84,19 +104,21 @@
       <p class="case-section__text">
         Участие должно быть максимально лёгким: один выбор, сразу понятно, что происходит и зачем.
       </p>
-      <div class="case-media case-media--wide">
-        <video class="scroll-video" muted playsinline preload="metadata" loop>
+      <div class="case-media case-media--wide case-video-wrap">
+        <video class="scroll-video case-video" muted playsinline preload="metadata" loop>
           <source src="video/votes.mp4" type="video/mp4" />
         </video>
+        <div class="tap-indicator" aria-hidden="true"></div>
       </div>
       <h3 class="case-section__subtitle">Со стороны продавца</h3>
       <p class="case-section__text">
         Продавец запускает голосование и видит результаты в реальном времени — и дальше может действовать по сценарию (например, выпустить купон на выбранный товар).
       </p>
-      <div class="case-media case-media--wide">
-        <video class="scroll-video" muted playsinline preload="metadata" loop>
+      <div class="case-media case-media--wide case-video-wrap">
+        <video class="scroll-video case-video" muted playsinline preload="metadata" loop>
           <source src="video/votes_streamer.mp4" type="video/mp4" />
         </video>
+        <div class="tap-indicator" aria-hidden="true"></div>
       </div>
     </section>
 

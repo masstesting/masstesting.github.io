@@ -364,12 +364,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("resize", handleResize);
 
+  setupCaseLoader();
   setupCaseSlider();
   setupAutoPlayVideos();
   setupScrollVideos();
   applyNonBreakingSpaces();
   setupCrossLinkHover();
 });
+
+function setupCaseLoader() {
+  const body = document.body;
+  if (!body.classList.contains("case-page")) return;
+
+  const loader = document.querySelector(".case-loader");
+  if (!loader) return;
+
+  const prevOverflow = body.style.overflow;
+  body.style.overflow = "hidden";
+
+  const minVisibleMs = 400;
+  const startedAt = performance.now();
+
+  const hideLoader = () => {
+    const elapsed = performance.now() - startedAt;
+    const wait = Math.max(0, minVisibleMs - elapsed);
+    window.setTimeout(() => {
+      loader.classList.add("is-hidden");
+      loader.addEventListener(
+        "transitionend",
+        () => {
+          loader.remove();
+          body.style.overflow = prevOverflow;
+        },
+        { once: true }
+      );
+    }, wait);
+  };
+
+  if (document.readyState === "complete") {
+    hideLoader();
+  } else {
+    window.addEventListener("load", hideLoader, { once: true });
+  }
+}
 
 function setupCaseSlider() {
   const slider = document.querySelector("[data-case-slider]");
@@ -563,7 +600,22 @@ function setupScrollVideos() {
     return;
   }
 
-  videos.forEach((video) => {
+  const ensureIndicator = (video) => {
+    const wrapper = video.closest(".case-video-wrap") || video.parentElement;
+    if (wrapper) {
+      wrapper.classList.add("case-video-wrap");
+    }
+    let indicator = wrapper ? wrapper.querySelector(".tap-indicator") : null;
+    if (!indicator && wrapper) {
+      indicator = document.createElement("div");
+      indicator.className = "tap-indicator";
+      indicator.setAttribute("aria-hidden", "true");
+      wrapper.appendChild(indicator);
+    }
+    return { wrapper, indicator };
+  };
+
+  const items = videos.map((video) => {
     video.muted = true;
     video.playsInline = true;
     video.loop = true;
@@ -571,7 +623,17 @@ function setupScrollVideos() {
     if (!video.hasAttribute("preload")) {
       video.preload = "metadata";
     }
+    const { wrapper, indicator } = ensureIndicator(video);
+    return {
+      el: video,
+      wrapper,
+      indicator,
+      isUserPaused: false,
+      hideTimer: null,
+    };
   });
+
+  const itemByVideo = new Map(items.map((item) => [item.el, item]));
 
   let active = null;
   let hasInteracted = false;
@@ -580,17 +642,69 @@ function setupScrollVideos() {
   const debounceMs = 150;
   const zone = { top: 0.3, bottom: 0.7 };
 
-  const pauseVideo = (video) => {
-    if (!video) return;
-    video.pause();
-    video.classList.remove("is-playing");
+  const showIndicator = (item, state) => {
+    if (!item || !item.indicator) return;
+    if (item.hideTimer) {
+      clearTimeout(item.hideTimer);
+      item.hideTimer = null;
+    }
+    const svg = state === "pause"
+      ? '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 10h8v28h-8zM26 10h8v28h-8z"/></svg>'
+      : '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M18 10l20 14-20 14z"/></svg>';
+    item.indicator.innerHTML = svg;
+    item.indicator.classList.add("is-visible");
+    item.hideTimer = window.setTimeout(() => {
+      item.indicator.classList.remove("is-visible");
+      item.hideTimer = null;
+    }, 520);
   };
 
-  const playVideo = (video) => {
-    if (!video) return;
-    video.classList.add("is-playing");
-    video.play().catch(() => {});
+  const pauseItem = (item, { fromUser = false } = {}) => {
+    if (!item) return;
+    item.el.pause();
+    if (fromUser) {
+      item.isUserPaused = true;
+    }
+    item.el.classList.remove("is-playing");
+    if (fromUser) {
+      showIndicator(item, "pause");
+    }
   };
+
+  const pauseOthers = (except) => {
+    items.forEach((other) => {
+      if (other !== except) {
+        pauseItem(other);
+      }
+    });
+  };
+
+  const playItem = (item, { fromUser = false } = {}) => {
+    if (!item) return;
+    if (item.isUserPaused && !fromUser) return;
+    pauseOthers(item);
+    item.isUserPaused = false;
+    item.el.classList.add("is-playing");
+    item.el.play().catch(() => {});
+    if (fromUser) {
+      showIndicator(item, "play");
+    }
+  };
+
+  items.forEach((item) => {
+    if (item.wrapper) {
+      item.wrapper.addEventListener("click", () => {
+        hasInteracted = true;
+        const playing = !item.el.paused && !item.el.ended && !item.isUserPaused;
+        if (playing) {
+          pauseItem(item, { fromUser: true });
+        } else {
+          playItem(item, { fromUser: true });
+          active = item;
+        }
+      });
+    }
+  });
 
   const evaluate = () => {
     scheduled = false;
@@ -600,29 +714,29 @@ function setupScrollVideos() {
     const vh = window.innerHeight || 1;
     const centerY = vh / 2;
 
-    const candidates = videos
-      .map((el) => {
-        const rect = el.getBoundingClientRect();
+    const candidates = items
+      .map((item) => {
+        const rect = item.el.getBoundingClientRect();
         const mid = rect.top + rect.height / 2;
         const norm = mid / vh;
         const inZone = norm >= zone.top && norm <= zone.bottom;
         return {
-          el,
+          item,
           inZone,
           distance: Math.abs(mid - centerY),
         };
       })
-      .filter((item) => item.inZone)
+      .filter((c) => c.inZone)
       .sort((a, b) => a.distance - b.distance);
 
-    const next = candidates.length ? candidates[0].el : null;
+    const next = candidates.find((c) => !c.item.isUserPaused)?.item || null;
 
     if (next && next !== active) {
-      if (active) pauseVideo(active);
+      if (active) pauseItem(active);
       active = next;
-      playVideo(active);
+      playItem(active);
     } else if (!next && active) {
-      pauseVideo(active);
+      pauseItem(active);
       active = null;
     }
   };
@@ -641,13 +755,24 @@ function setupScrollVideos() {
   };
 
   const io = new IntersectionObserver(
-    () => {
+    (entries) => {
+      entries.forEach((entry) => {
+        const item = itemByVideo.get(entry.target);
+        if (!item) return;
+        if (entry.intersectionRatio === 0) {
+          item.isUserPaused = false;
+          pauseItem(item);
+          if (item === active) {
+            active = null;
+          }
+        }
+      });
       scheduleEval();
     },
     { threshold: [0, 0.25, 0.5, 0.75, 1] }
   );
 
-  videos.forEach((v) => io.observe(v));
+  items.forEach((v) => io.observe(v.el));
 
   const onFirstInteraction = () => {
     hasInteracted = true;
@@ -663,7 +788,7 @@ function setupScrollVideos() {
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
-      videos.forEach(pauseVideo);
+      items.forEach((item) => pauseItem(item));
       active = null;
     }
   });
