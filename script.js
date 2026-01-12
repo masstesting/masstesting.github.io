@@ -1028,7 +1028,7 @@ function setupProtectedSamokatLink() {
     return;
   }
 
-  const password = "PressStart";
+  const password = "pressStart";
   const promptMessage = "Введите пароль или свяжитесь со мной, чтобы его узнать:";
   const errorMessage = "Неверный пароль.";
 
