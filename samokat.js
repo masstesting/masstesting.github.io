@@ -416,38 +416,58 @@ function setupCaseLoader() {
     }, wait);
   };
 
+  let settled = false;
   const onAllLoaded = () => {
+    if (settled) return;
+    settled = true;
     hideLoader();
     document.removeEventListener("DOMContentLoaded", onAllLoaded);
     window.removeEventListener("load", onAllLoaded);
   };
 
-  if (document.readyState === "complete") {
-    onAllLoaded();
-  } else {
-    document.addEventListener("DOMContentLoaded", () => {
-      const videos = Array.from(document.querySelectorAll("video"));
-      if (!videos.length) {
+  const beginWaiting = () => {
+    if (settled) return;
+    const videos = Array.from(document.querySelectorAll("video"));
+    if (!videos.length) {
+      onAllLoaded();
+      return;
+    }
+    let remaining = videos.length;
+    let fallbackTimer = window.setTimeout(onAllLoaded, 6000);
+    const settle = () => {
+      if (settled) return;
+      remaining -= 1;
+      if (remaining <= 0) {
+        window.clearTimeout(fallbackTimer);
         onAllLoaded();
-        return;
       }
-      let remaining = videos.length;
-      const settle = () => {
-        remaining -= 1;
-        if (remaining <= 0) {
-          onAllLoaded();
-        }
-      };
-      videos.forEach((v) => {
-        if (v.readyState >= 3) {
-          settle();
-        } else {
-          v.addEventListener("canplaythrough", settle, { once: true });
-          v.addEventListener("error", settle, { once: true });
-        }
-      });
-      window.addEventListener("load", onAllLoaded, { once: true });
+    };
+    videos.forEach((v) => {
+      if (v.readyState >= 3) {
+        settle();
+      } else {
+        v.addEventListener("canplaythrough", settle, { once: true });
+        v.addEventListener("error", settle, { once: true });
+      }
     });
+    window.addEventListener("load", () => {
+      if (!settled) {
+        window.clearTimeout(fallbackTimer);
+        onAllLoaded();
+      }
+    }, { once: true });
+    document.addEventListener("visibilitychange", () => {
+      if (!settled && document.visibilityState === "hidden") {
+        window.clearTimeout(fallbackTimer);
+        onAllLoaded();
+      }
+    });
+  };
+
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    beginWaiting();
+  } else {
+    document.addEventListener("DOMContentLoaded", beginWaiting, { once: true });
   }
 }
 
